@@ -233,13 +233,25 @@ png_free(png_const_structrp png_ptr, png_voidp ptr)
 {
    if (png_ptr == NULL || ptr == NULL)
       return;
+#ifdef __EMSCRIPTEN__
+    if(ptr != NULL)
+    {
+      free(ptr);
+      return;
+    }
+#endif /* __EMSCRIPTEN__ */
 
 #ifdef PNG_USER_MEM_SUPPORTED
-   if (png_ptr->free_fn != NULL)
+#ifdef __EMSCRIPTEN__
+    png_free_default(png_ptr, ptr);
+#endif /* __EMSCRIPTEN__ */
+#ifndef __EMSCRIPTEN__
+    if (png_ptr->free_fn != NULL)
       png_ptr->free_fn(png_constcast(png_structrp,png_ptr), ptr);
-
-   else
+    
+    else
       png_free_default(png_ptr, ptr);
+#endif /* __EMSCRIPTEN__ */
 }
 
 PNG_FUNCTION(void,PNGAPI
